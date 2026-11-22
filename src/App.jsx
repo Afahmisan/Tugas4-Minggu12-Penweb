@@ -58,20 +58,17 @@ function App() {
     }
 
     return (
-        <div className="min-h-screen bg-[#F0F3F7] text-[#212121]">
-            <Navbar
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                onAddClick={openAddModal}
-                totalProducts={products.length}
-            />
+        <div className="page-shell">
+            <main className="page-container">
+                <Navbar
+                    searchQuery={searchQuery}
+                    onSearchChange={setSearchQuery}
+                    onAddClick={openAddModal}
+                    totalProducts={products.length}
+                />
 
-            <main className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
                 {filteredProducts.length > 0 ? (
-                    <section
-                        aria-label="Daftar produk"
-                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
-                    >
+                    <section aria-label="Daftar produk" className="products-grid">
                         {filteredProducts.map((product) => (
                             <ProductCard
                                 key={product.id}
@@ -82,23 +79,23 @@ function App() {
                         ))}
                     </section>
                 ) : (
-                    <div className="bg-white border border-[#E5E7E9] rounded-xl p-8 text-center">
-                        <p className="text-sm font-semibold text-[#212121]">
+                    <div className="empty-panel">
+                        <p className="empty-title">
                             {products.length === 0
                                 ? 'Belum ada produk yang tersimpan.'
                                 : `Tidak ada produk dengan kata kunci "${searchQuery.trim()}".`}
                         </p>
-                        <p className="text-sm text-[#5B6270] mt-1">
+                        <p className="empty-desc">
                             {products.length === 0
                                 ? 'Tambahkan produk pertama Anda menggunakan tombol di bawah ini.'
                                 : 'Coba gunakan kata kunci lain atau tampilkan semua produk.'}
                         </p>
-                        <div className="mt-4">
+                        <div className="empty-actions">
                             {products.length === 0 ? (
                                 <button
                                     type="button"
                                     onClick={openAddModal}
-                                    className="min-h-[44px] px-4 py-2 text-sm font-semibold text-white bg-[#008040] hover:bg-[#006B35] rounded-lg transition cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#00AA5B]"
+                                    className="btn btn-primary"
                                 >
                                     + Tambah Produk
                                 </button>
@@ -106,7 +103,7 @@ function App() {
                                 <button
                                     type="button"
                                     onClick={() => setSearchQuery('')}
-                                    className="min-h-[44px] px-4 py-2 text-sm font-semibold text-[#008040] bg-white border border-[#008040] rounded-lg hover:bg-[#EBFBF1] transition cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#00AA5B]"
+                                    className="btn btn-secondary"
                                 >
                                     Reset Pencarian
                                 </button>
@@ -115,8 +112,8 @@ function App() {
                     </div>
                 )}
 
-                <footer className="mt-6">
-                    <p className="text-sm text-[#5B6270]">
+                <footer className="list-footer">
+                    <p className="list-footer-text">
                         Menampilkan {filteredProducts.length} dari {products.length} produk
                     </p>
                 </footer>

@@ -1,15 +1,619 @@
 @import "tailwindcss";
 
-:root {
-  color-scheme: light;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@theme {
+  --color-canvas: #f0f3f7;
+  --color-surface: #ffffff;
+  --color-surface-subtle: #f8fafc;
+  --color-ink: #212121;
+  --color-muted: #5b6270;
+  --color-line: #e5e7e9;
+  --color-line-input: #d1d5db;
+  --color-brand: #00aa5b;
+  --color-brand-primary: #008040;
+  --color-brand-primary-hover: #006b35;
+  --color-brand-soft: #ebfbf1;
+  --color-brand-soft-text: #007a3d;
+  --color-brand-soft-border: #bfefd4;
+  --color-danger: #d91b42;
+  --color-danger-hover: #b81436;
+  --color-danger-soft: #fff0f3;
+  --color-danger-soft-border: #facdd7;
 }
 
-body {
-  margin: 0;
-  min-height: 100vh;
-  background-color: #f0f3f7;
-  color: #212121;
+@layer base {
+  :root {
+    color-scheme: light;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply m-0 min-h-screen bg-canvas text-ink;
+  }
+}
+
+@layer components {
+  /* Kerangka layout bersama (Sidebar desktop + Topbar & Bottom Nav mobile) */
+  .app-shell {
+    @apply min-h-screen bg-canvas text-ink md:flex;
+  }
+
+  .sidebar {
+    @apply hidden md:flex md:flex-col md:w-64 md:shrink-0 md:sticky md:top-0 md:h-screen bg-surface border-r border-line border-t-[3px] border-t-brand;
+  }
+
+  .sidebar-brand {
+    @apply flex items-center gap-3 px-5 py-5 border-b border-line;
+  }
+
+  .sidebar-logo {
+    @apply w-9 h-9 shrink-0;
+  }
+
+  .sidebar-title {
+    @apply text-base font-bold text-ink leading-tight;
+  }
+
+  .sidebar-subtitle {
+    @apply text-xs text-muted mt-0.5;
+  }
+
+  .sidebar-nav {
+    @apply flex-1 px-3 py-4 flex flex-col gap-1.5;
+  }
+
+  .sidebar-link {
+    @apply min-h-[44px] px-3.5 py-2.5 rounded-lg flex items-center gap-3 text-sm font-medium text-ink border border-transparent hover:bg-surface-subtle transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand;
+  }
+
+  .sidebar-link-active {
+    @apply bg-brand-soft text-brand-soft-text border-brand-soft-border font-semibold hover:bg-brand-soft;
+  }
+
+  .nav-icon {
+    @apply w-5 h-5 shrink-0;
+  }
+
+  .sidebar-footer {
+    @apply px-5 py-4 border-t border-line bg-surface-subtle flex flex-col gap-2;
+  }
+
+  .sidebar-stat-row {
+    @apply flex items-center justify-between text-xs;
+  }
+
+  .sidebar-stat-label {
+    @apply text-muted;
+  }
+
+  .sidebar-stat-value {
+    @apply font-semibold text-ink;
+  }
+
+  .mobile-topbar {
+    @apply md:hidden bg-surface border-t-[3px] border-t-brand border-b border-line px-4 py-3 flex items-center justify-between gap-3;
+  }
+
+  .mobile-brand {
+    @apply flex items-center gap-2.5 min-w-0;
+  }
+
+  .mobile-brand-logo {
+    @apply w-8 h-8 shrink-0;
+  }
+
+  .mobile-brand-title {
+    @apply text-base font-bold text-ink truncate;
+  }
+
+  .mobile-bottom-nav {
+    @apply md:hidden fixed inset-x-0 bottom-0 z-40 bg-surface border-t border-line grid grid-cols-3 gap-1 px-2 py-1.5 pb-[max(0.375rem,env(safe-area-inset-bottom))];
+  }
+
+  .mobile-nav-link {
+    @apply min-h-[44px] px-2 py-1.5 rounded-lg flex flex-col items-center justify-center gap-0.5 text-xs font-medium text-muted border border-transparent transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand;
+  }
+
+  .mobile-nav-link-active {
+    @apply bg-brand-soft text-brand-soft-text border-brand-soft-border font-semibold;
+  }
+
+  .mobile-nav-icon {
+    @apply w-5 h-5 shrink-0;
+  }
+
+  .app-content {
+    @apply flex-1 min-w-0 pb-24 md:pb-8;
+  }
+
+  /* Kontainer halaman dan header */
+  .page-shell {
+    @apply min-h-screen bg-canvas text-ink;
+  }
+
+  .page-container {
+    @apply max-w-5xl mx-auto px-4 sm:px-6 py-5 sm:py-8;
+  }
+
+  .page-header {
+    @apply flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4;
+  }
+
+  .page-heading {
+    @apply text-xl sm:text-2xl font-bold text-ink;
+  }
+
+  .page-lead {
+    @apply text-sm text-muted mt-1;
+  }
+
+  /* Header / Toolbar halaman Produk */
+  .products-header {
+    @apply bg-surface border border-line border-t-[3px] border-t-brand rounded-xl mb-6;
+  }
+
+  .products-header-inner {
+    @apply px-4 sm:px-6 py-5;
+  }
+
+  .products-header-top {
+    @apply flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5;
+  }
+
+  .products-brand {
+    @apply flex items-center gap-3 min-w-0;
+  }
+
+  .products-brand-logo {
+    @apply w-10 h-10 shrink-0;
+  }
+
+  .products-title {
+    @apply text-xl sm:text-2xl font-bold text-ink;
+  }
+
+  .products-subtitle {
+    @apply text-sm text-muted mt-0.5;
+  }
+
+  .products-toolbar {
+    @apply flex flex-wrap items-center justify-between gap-3;
+  }
+
+  .search-box {
+    @apply relative w-full sm:max-w-sm;
+  }
+
+  .search-icon {
+    @apply w-4 h-4 text-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none;
+  }
+
+  .search-input {
+    @apply w-full min-h-[44px] pl-10 pr-11 py-2 bg-surface-subtle border border-line-input rounded-lg text-sm text-ink placeholder-muted focus:bg-surface focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand-primary;
+  }
+
+  .search-clear-btn {
+    @apply absolute right-0 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-muted hover:text-ink hover:bg-gray-100 cursor-pointer focus-visible:outline-2 focus-visible:outline-brand;
+  }
+
+  .search-clear-icon {
+    @apply w-4 h-4;
+  }
+
+  .toolbar-meta {
+    @apply flex flex-wrap items-center gap-2 shrink-0;
+  }
+
+  .count-badge {
+    @apply inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-brand-soft text-brand-soft-text border border-brand-soft-border shrink-0;
+  }
+
+  .mode-link-pill {
+    @apply inline-flex items-center min-h-[44px] px-3.5 py-2 rounded-lg text-xs font-semibold text-ink bg-surface-subtle border border-line-input hover:border-brand transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand;
+  }
+
+  /* Tombol dan tautan */
+  .btn {
+    @apply inline-flex items-center justify-center min-h-[44px] px-4 py-2 text-sm font-semibold rounded-lg transition cursor-pointer no-underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand;
+  }
+
+  .btn-primary {
+    @apply text-surface bg-brand-primary hover:bg-brand-primary-hover;
+  }
+
+  .btn-secondary {
+    @apply text-brand-primary bg-surface border border-brand-primary hover:bg-brand-soft;
+  }
+
+  .btn-neutral {
+    @apply text-ink bg-surface border border-line-input hover:bg-surface-subtle;
+  }
+
+  .btn-danger {
+    @apply text-danger bg-surface border border-danger hover:bg-danger-soft focus-visible:outline-danger;
+  }
+
+  .btn-danger-solid {
+    @apply text-surface bg-danger hover:bg-danger-hover focus-visible:outline-danger;
+  }
+
+  .btn-compact {
+    @apply px-3;
+  }
+
+  .btn-full {
+    @apply w-full;
+  }
+
+  .btn-icon-close {
+    @apply min-w-[44px] min-h-[44px] -mr-2 -mt-2 flex items-center justify-center rounded-lg text-muted hover:text-ink hover:bg-gray-100 transition cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand;
+  }
+
+  .inline-link {
+    @apply inline-flex items-center gap-1.5 min-h-[44px] text-sm font-semibold text-brand-primary hover:text-brand-primary-hover underline underline-offset-4 rounded-md px-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand;
+  }
+
+  /* Daftar produk (Grid dan List) */
+  .products-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4;
+  }
+
+  .products-list {
+    @apply flex flex-col gap-3;
+  }
+
+  .product-card {
+    @apply bg-surface border border-line hover:border-brand rounded-xl p-5 shadow-xs transition-colors flex flex-col justify-between;
+  }
+
+  .product-card-list {
+    @apply sm:flex-row sm:items-center sm:justify-between sm:gap-4;
+  }
+
+  .product-card-body {
+    @apply min-w-0;
+  }
+
+  .product-card-list-body {
+    @apply sm:flex sm:items-center sm:gap-4 sm:flex-1 sm:min-w-0;
+  }
+
+  .product-id-badge {
+    @apply inline-block text-xs font-semibold text-brand-soft-text bg-brand-soft px-2 py-0.5 rounded-md shrink-0;
+  }
+
+  .product-card-title {
+    @apply text-lg font-bold text-ink mt-2.5 break-words;
+  }
+
+  .product-card-list-title {
+    @apply sm:mt-0 sm:flex-1 sm:min-w-0;
+  }
+
+  .product-title-link {
+    @apply text-ink hover:text-brand-primary transition-colors no-underline rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand;
+  }
+
+  .product-card-price {
+    @apply text-lg font-extrabold text-brand-primary mt-1 tabular-nums shrink-0;
+  }
+
+  .product-card-list-price {
+    @apply sm:mt-0 sm:ml-auto;
+  }
+
+  .product-card-actions {
+    @apply mt-4 pt-4 border-t border-canvas flex flex-col gap-2.5;
+  }
+
+  .product-card-actions-row {
+    @apply grid grid-cols-2 gap-2.5;
+  }
+
+  .product-list-actions {
+    @apply mt-4 pt-4 border-t border-canvas flex flex-wrap items-center gap-2 sm:mt-0 sm:pt-0 sm:border-t-0 sm:shrink-0;
+  }
+
+  /* State kosong dan footer */
+  .empty-panel {
+    @apply bg-surface border border-line rounded-xl p-6 sm:p-8 text-center;
+  }
+
+  .empty-title {
+    @apply text-base font-semibold text-ink;
+  }
+
+  .empty-desc {
+    @apply text-sm text-muted mt-1.5;
+  }
+
+  .empty-actions {
+    @apply mt-4 flex flex-wrap items-center justify-center gap-3;
+  }
+
+  .list-footer {
+    @apply mt-6;
+  }
+
+  .list-footer-text {
+    @apply text-sm text-muted;
+  }
+
+  /* Modal tambah/edit dan modal konfirmasi hapus */
+  .modal-overlay {
+    @apply fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4;
+  }
+
+  .modal-dialog {
+    @apply w-full max-w-md bg-surface border border-line rounded-xl shadow-xl p-6;
+  }
+
+  .modal-dialog-sm {
+    @apply relative w-full max-w-sm bg-surface border border-line rounded-xl shadow-xl p-6;
+  }
+
+  .modal-header {
+    @apply flex items-start justify-between gap-4;
+  }
+
+  .modal-title {
+    @apply text-lg font-bold text-ink;
+  }
+
+  .modal-subtitle {
+    @apply text-sm text-muted mt-0.5;
+  }
+
+  .modal-close-icon {
+    @apply w-5 h-5;
+  }
+
+  .modal-edit-badge {
+    @apply inline-block text-xs font-semibold text-brand-soft-text bg-brand-soft px-2 py-0.5 rounded-md mt-3;
+  }
+
+  .modal-form {
+    @apply mt-4 space-y-4;
+  }
+
+  .alert-error {
+    @apply text-sm font-medium text-danger-hover bg-danger-soft border border-danger-soft-border rounded-lg px-3 py-2;
+  }
+
+  .form-label {
+    @apply block text-sm font-semibold text-ink mb-1.5;
+  }
+
+  .form-input {
+    @apply w-full min-h-[44px] px-3 py-2 bg-surface border border-line-input rounded-lg text-sm text-ink placeholder-muted focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand-primary;
+  }
+
+  .form-hint {
+    @apply text-xs text-muted mt-1.5;
+  }
+
+  .modal-actions {
+    @apply pt-2 flex items-center justify-end gap-3;
+  }
+
+  .delete-close-btn {
+    @apply absolute right-3 top-3 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-muted hover:text-ink hover:bg-gray-100 transition cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand;
+  }
+
+  .delete-icon-wrap {
+    @apply w-12 h-12 rounded-xl bg-danger-soft text-danger flex items-center justify-center mx-auto;
+  }
+
+  .delete-icon {
+    @apply w-6 h-6;
+  }
+
+  .delete-title {
+    @apply text-lg font-bold text-ink mt-4 text-center;
+  }
+
+  .delete-desc {
+    @apply text-sm text-muted mt-1 text-center;
+  }
+
+  .delete-preview {
+    @apply mt-4 bg-surface-subtle border border-line rounded-lg p-3.5 text-left;
+  }
+
+  .delete-preview-name {
+    @apply text-base font-bold text-ink mt-1.5 break-words;
+  }
+
+  .delete-preview-price {
+    @apply text-base font-extrabold text-brand-primary mt-0.5 tabular-nums;
+  }
+
+  .delete-actions {
+    @apply mt-6 grid grid-cols-2 gap-3;
+  }
+
+  /* Halaman Dashboard */
+  .summary-grid {
+    @apply grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6;
+  }
+
+  .summary-card {
+    @apply bg-surface border border-line rounded-xl p-5 flex flex-col justify-between gap-2;
+  }
+
+  .summary-label {
+    @apply text-xs font-semibold text-muted uppercase tracking-wide;
+  }
+
+  .summary-value {
+    @apply text-2xl font-extrabold text-ink tabular-nums;
+  }
+
+  .summary-note {
+    @apply text-xs text-muted;
+  }
+
+  .dashboard-panel {
+    @apply mt-6 bg-surface border border-line rounded-xl p-5 sm:p-6;
+  }
+
+  .panel-header {
+    @apply flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-line;
+  }
+
+  .panel-title {
+    @apply text-base font-bold text-ink;
+  }
+
+  .quick-list {
+    @apply divide-y divide-line;
+  }
+
+  .quick-row {
+    @apply py-3.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2;
+  }
+
+  .quick-row-main {
+    @apply flex items-center gap-3 min-w-0;
+  }
+
+  .quick-row-name {
+    @apply text-sm font-semibold text-ink hover:text-brand-primary no-underline truncate rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand;
+  }
+
+  .quick-row-meta {
+    @apply flex items-center justify-between sm:justify-end gap-4 shrink-0;
+  }
+
+  .quick-row-price {
+    @apply text-sm font-bold text-brand-primary tabular-nums;
+  }
+
+  .header-actions {
+    @apply flex flex-wrap items-center gap-2.5;
+  }
+
+  /* Halaman Detail Produk (/products/:id) */
+  .breadcrumb-row {
+    @apply mb-4;
+  }
+
+  .detail-card {
+    @apply bg-surface border border-line border-t-[3px] border-t-brand rounded-xl p-6 sm:p-8 shadow-xs;
+  }
+
+  .detail-header {
+    @apply flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 pb-6 border-b border-line;
+  }
+
+  .detail-title {
+    @apply text-2xl sm:text-3xl font-bold text-ink mt-3 break-words;
+  }
+
+  .detail-price {
+    @apply text-2xl font-extrabold text-brand-primary tabular-nums shrink-0;
+  }
+
+  .detail-meta-list {
+    @apply grid grid-cols-1 sm:grid-cols-2 gap-4 py-6 border-b border-line;
+  }
+
+  .detail-meta-item {
+    @apply bg-surface-subtle border border-line rounded-lg p-4;
+  }
+
+  .detail-meta-label {
+    @apply text-xs font-semibold text-muted;
+  }
+
+  .detail-meta-value {
+    @apply text-sm font-bold text-ink mt-1 break-words;
+  }
+
+  .detail-actions {
+    @apply pt-6 flex flex-wrap items-center gap-3;
+  }
+
+  /* Halaman Settings (/settings) */
+  .settings-card {
+    @apply mt-6 bg-surface border border-line rounded-xl p-5 sm:p-6;
+  }
+
+  .settings-fieldset {
+    @apply border-0 m-0 p-0;
+  }
+
+  .settings-legend {
+    @apply text-base font-bold text-ink;
+  }
+
+  .settings-hint {
+    @apply text-sm text-muted mt-1;
+  }
+
+  .option-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 gap-4 mt-5;
+  }
+
+  .option-card {
+    @apply min-h-[44px] w-full text-left p-5 rounded-xl border border-line-input bg-surface hover:border-brand transition cursor-pointer flex flex-col gap-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand;
+  }
+
+  .option-card-active {
+    @apply border-2 border-brand-primary bg-brand-soft;
+  }
+
+  .option-header {
+    @apply flex items-center justify-between gap-3 w-full;
+  }
+
+  .option-title {
+    @apply text-base font-bold text-ink;
+  }
+
+  .option-status {
+    @apply text-xs font-semibold px-2.5 py-1 rounded-full bg-surface border border-line-input text-muted;
+  }
+
+  .option-status-active {
+    @apply bg-brand-primary text-surface border-brand-primary;
+  }
+
+  .option-desc {
+    @apply text-sm text-muted;
+  }
+
+  .settings-footer {
+    @apply mt-6 pt-5 border-t border-line flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3;
+  }
+
+  .settings-current-text {
+    @apply text-sm text-ink;
+  }
+
+  /* Halaman 404 */
+  .not-found-card {
+    @apply max-w-lg mx-auto mt-6 bg-surface border border-line border-t-[3px] border-t-brand rounded-xl p-6 sm:p-8 text-center;
+  }
+
+  .not-found-code {
+    @apply inline-block text-sm font-extrabold text-danger-hover bg-danger-soft border border-danger-soft-border px-3 py-1 rounded-full;
+  }
+
+  .not-found-title {
+    @apply text-2xl font-bold text-ink mt-4;
+  }
+
+  .not-found-desc {
+    @apply text-sm text-muted mt-2;
+  }
+
+  .not-found-path {
+    @apply inline-block mt-3 px-3 py-1 rounded-md bg-surface-subtle border border-line text-xs font-semibold text-ink break-all;
+  }
+
+  .not-found-actions {
+    @apply mt-6 flex flex-wrap items-center justify-center gap-3;
+  }
 }

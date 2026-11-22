@@ -1,21 +1,19 @@
 function Navbar({ searchQuery, onSearchChange, onAddClick, totalProducts }) {
     return (
-        <header className="bg-white border-t-[3px] border-t-[#00AA5B] border-b border-b-[#E5E7E9]">
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 py-5">
+        <header className="products-header">
+            <div className="products-header-inner">
                 {/* Baris 1: Judul & Tombol Tambah */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
-                    <div className="flex items-center gap-3">
+                <div className="products-header-top">
+                    <div className="products-brand">
                         <img
                             src="/favicon.svg"
                             alt=""
                             aria-hidden="true"
-                            className="w-10 h-10 shrink-0"
+                            className="products-brand-logo"
                         />
                         <div>
-                            <h1 className="text-xl sm:text-2xl font-bold text-[#212121]">
-                                Manajemen Produk
-                            </h1>
-                            <p className="text-sm text-[#5B6270] mt-0.5">
+                            <h1 className="products-title">Manajemen Produk</h1>
+                            <p className="products-subtitle">
                                 Kelola daftar produk dan harga dalam satu tempat.
                             </p>
                         </div>
@@ -24,18 +22,18 @@ function Navbar({ searchQuery, onSearchChange, onAddClick, totalProducts }) {
                     <button
                         type="button"
                         onClick={onAddClick}
-                        className="min-h-[44px] bg-[#008040] hover:bg-[#006B35] text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#00AA5B]"
+                        className="btn btn-primary"
                     >
                         + Tambah Produk
                     </button>
                 </div>
 
                 {/* Baris 2: Search Bar & Total Produk */}
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div className="relative w-full max-w-sm">
+                <div className="products-toolbar">
+                    <div className="search-box">
                         <svg
                             aria-hidden="true"
-                            className="w-4 h-4 text-[#5B6270] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
+                            className="search-icon"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -54,7 +52,7 @@ function Navbar({ searchQuery, onSearchChange, onAddClick, totalProducts }) {
                             value={searchQuery}
                             onChange={(e) => onSearchChange(e.target.value)}
                             placeholder="Cari nama produk..."
-                            className="w-full min-h-[44px] pl-10 pr-10 py-2 bg-[#F8FAFC] border border-[#D1D5DB] rounded-lg text-sm text-[#212121] placeholder-[#5B6270] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#00AA5B] focus:border-[#008040]"
+                            className="search-input"
                         />
 
                         {searchQuery && (
@@ -62,11 +60,11 @@ function Navbar({ searchQuery, onSearchChange, onAddClick, totalProducts }) {
                                 type="button"
                                 onClick={() => onSearchChange('')}
                                 aria-label="Hapus pencarian"
-                                className="absolute right-1 top-1/2 -translate-y-1/2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-md text-[#5B6270] hover:text-[#212121] hover:bg-gray-100 cursor-pointer focus-visible:outline-2 focus-visible:outline-[#00AA5B]"
+                                className="search-clear-btn"
                             >
                                 <svg
                                     aria-hidden="true"
-                                    className="w-4 h-4"
+                                    className="search-clear-icon"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -82,9 +80,7 @@ function Navbar({ searchQuery, onSearchChange, onAddClick, totalProducts }) {
                         )}
                     </div>
 
-                    <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-[#EBFBF1] text-[#007A3D] border border-[#BFEFD4] shrink-0">
-                        {totalProducts} produk
-                    </span>
+                    <span className="count-badge">{totalProducts} produk</span>
                 </div>
             </div>
         </header>
