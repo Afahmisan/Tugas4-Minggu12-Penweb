@@ -1,22 +1,33 @@
 # Manajemen Produk (Tugas 4 Pemrograman Web)
 
-Aplikasi frontend berbasis React 19, React Router v7, Vite, dan Tailwind CSS v4 untuk pengelolaan katalog produk multi-halaman. Proyek ini melanjutkan aplikasi CRUD dari Tugas 3 dengan menambahkan layout navigasi bersama, halaman Dashboard, daftar produk (mode Grid dan List), halaman detail produk dinamis (`/products/:id`), halaman pengaturan tampilan (`/settings`), serta halaman `404` untuk rute yang tidak ditemukan.
+Aplikasi frontend berbasis React 19, React Router v7, Vite, dan Tailwind CSS v4 untuk pengelolaan katalog produk multi-halaman yang terintegrasi dengan backend REST API ExpressJS dan database PostgreSQL (Prisma ORM) dari Tugas 2.
 
 ![Tampilan Dashboard Manajemen Produk](evidence/01_dashboard.png)
 
-## Sentralisasi Tailwind CSS di Satu Berkas
+## Integrasi Backend ExpressJS dan Sentralisasi Tailwind CSS
 
-Seluruh konfigurasi Tailwind CSS (`@import "tailwindcss";`, `@theme`, `@layer base`, dan `@layer components` dengan `@apply`) dipusatkan pada satu berkas, yaitu [`src/index.css`](src/index.css). Komponen JSX hanya memakai nama class semantik tanpa menyisipkan utility class Tailwind langsung di atribut `className`.
+- **Integrasi REST API ExpressJS + PostgreSQL**: seluruh operasi baca dan tulis produk terhubung ke server ExpressJS (`http://localhost:3000`) melalui Vite proxy `/api` pada [`vite.config.js`](vite.config.js) dan modul API client [`src/utils/productApi.js`](src/utils/productApi.js). Data produk tersimpan persisten di PostgreSQL dan bertahan saat halaman dimuat ulang.
+- **Sentralisasi Tailwind CSS di Satu Berkas**: seluruh konfigurasi Tailwind CSS (`@import "tailwindcss";`, `@theme`, `@layer base`, dan `@layer components` via `@apply`) dipusatkan pada satu berkas, yaitu [`src/index.css`](src/index.css). Komponen JSX hanya memakai nama class semantik tanpa menyisipkan utility class Tailwind langsung di `className`.
+
+## Endpoint API yang Digunakan
+
+| Aksi UI | Request Frontend (Vite Proxy) | Diteruskan ke Backend ExpressJS |
+|---|---|---|
+| Muat daftar produk | `GET /api/products` | `GET /products` (`200 OK`) |
+| Muat detail produk | `GET /api/products/:id` | `GET /products/:id` (`200 OK` / `404`) |
+| Tambah produk baru | `POST /api/products` | `POST /products` (`201 Created`) |
+| Perbarui produk | `PUT /api/products/:id` | `PUT /products/:id` (`200 OK`) |
+| Hapus produk | `DELETE /api/products/:id` | `DELETE /products/:id` (`200 OK`) |
 
 ## Desain UI dan Aksesibilitas (WCAG AA dan 1.4.11)
 
-Antarmuka memakai palet tema seller Tokopedia dengan pemeriksaan kontras teks dan kontrol interaktif:
+Antarmuka memakai palet tema seller Tokopedia dengan pemeriksaan kontras teks, kontrol interaktif, dan state API (`loading`, `error`, dan `disabled`):
 
-- Teks utama `#212121` di atas permukaan `#FFFFFF` (16,10:1) dan latar `#F0F3F7` (14,47:1); teks sekunder `#5B6270` di atas `#FFFFFF` (6,13:1) dan `#F0F3F7` (5,51:1).
+- Teks utama `#212121` di atas `#FFFFFF` (16,10:1) dan `#F0F3F7` (14,47:1); teks sekunder `#5B6270` di atas `#FFFFFF` (6,13:1) dan `#F0F3F7` (5,51:1).
 - Aksi utama, tombol `Edit`, teks harga, dan ring fokus (`focus-visible`) memakai `#008040` (5,05:1 di atas `#FFFFFF`, 4,71:1 di atas `#EBFBF1`, 4,53:1 di atas `#F0F3F7`).
-- Badge `ID` memakai `#007A3D` di atas `#EBFBF1` (5,09:1); aksi hapus dan alert validasi memakai `#D91B42` (5,02:1 di atas `#FFFFFF`) serta `#B81436` di atas `#FFF0F3` (5,96:1).
-- Border input dan tombol netral memakai `#767E8C` (4,09:1 di atas `#FFFFFF`, 3,91:1 di atas `#F8FAFC`, 3,68:1 di atas `#F0F3F7`) sehingga melewati ambang batas non-teks 3:1.
-- Aksesibilitas keyboard didukung melalui skip link `"Lewati ke konten utama"` menuju `#main-content`, indikator `:focus-visible`, penutupan modal dengan `Escape`, target sentuh minimal 44px, serta navigasi responsif (sidebar di desktop dan bottom navigation di layar ponsel).
+- Badge `ID` memakai `#007A3D` di atas `#EBFBF1` (5,09:1); aksi hapus, alert validasi, dan panel error API memakai `#D91B42` (5,02:1 di atas `#FFFFFF`) serta `#B81436` di atas `#FFF0F3` (5,96:1).
+- Border input dan tombol netral memakai `#767E8C` (4,09:1 di atas `#FFFFFF`, 3,91:1 di atas `#F8FAFC`, 3,68:1 di atas `#F0F3F7`).
+- Aksesibilitas keyboard didukung melalui skip link `"Lewati ke konten utama"` menuju `#main-content`, indikator `:focus-visible`, penutupan modal dengan `Escape`, target sentuh minimal 44px, serta navigasi responsif (sidebar desktop dan bottom navigation ponsel).
 
 ## Rute dan Struktur Modul
 
@@ -25,9 +36,9 @@ Antarmuka memakai palet tema seller Tokopedia dengan pemeriksaan kontras teks da
 | Rute | Halaman / Perilaku |
 |---|---|
 | `/` | Redirect ke `/dashboard` |
-| `/dashboard` | Ringkasan faktual katalog (jumlah produk, total nilai satuan, rentang harga, mode tampilan aktif) dan akses cepat detail |
-| `/products` | Halaman daftar produk dengan pencarian real-time, tambah/edit/hapus produk, serta tampilan Grid atau List |
-| `/products/:id` | Detail produk sesuai parameter ID beserta tombol Edit, Hapus, Link kembali, dan pesan jelas jika ID tidak ditemukan |
+| `/dashboard` | Ringkasan faktual katalog dari database (jumlah produk, total nilai satuan, rentang harga, mode tampilan aktif) dan daftar ringkas produk |
+| `/products` | Halaman daftar produk dengan pencarian real-time, tambah/edit/hapus produk ke PostgreSQL, state loading/error + tombol `Coba Lagi`, serta mode `Grid` atau `List` |
+| `/products/:id` | Mengambil detail produk dari `GET /api/products/:id`, menyediakan tombol Edit, Hapus, Link kembali, serta pesan jelas saat ID tidak ditemukan (`404`) |
 | `/settings` | Pengaturan mode tampilan `Grid` atau `List` yang langsung diterapkan dan disimpan ke `localStorage` |
 | `*` | Halaman `404` dengan pesan jelas, path URL yang diakses, dan tautan kembali |
 
@@ -35,23 +46,27 @@ Antarmuka memakai palet tema seller Tokopedia dengan pemeriksaan kontras teks da
 
 | Modul | Lokasi | Peran |
 |---|---|---|
-| Stylesheet terpusat | `src/index.css` | Satu-satunya berkas Tailwind CSS dan seluruh class komponen |
+| Stylesheet terpusat | `src/index.css` | Satu-satunya berkas Tailwind CSS dan seluruh class komponen (termasuk state loading, error, disabled) |
+| Proxy & Env | `vite.config.js`, `.env.example` | Meneruskan `/api/*` ke `http://localhost:3000` saat dev dan preview |
+| API Client | `src/utils/productApi.js` | Pembungkus `fetch` dan kelas `ApiError` untuk operasi CRUD ke ExpressJS |
 | Entry & Router | `src/main.jsx` | Membungkus aplikasi dengan `BrowserRouter` |
-| Root State & Routes | `src/App.jsx` | Menyimpan state `products`, `nextId`, `searchQuery`, `viewMode`, modal, dan definisi `<Routes>` |
+| Root State & Routes | `src/App.jsx` | Mengelola fetch katalog, mutasi CRUD async, state loading/error modal, serta `<Routes>` |
 | Layout Bersama | `src/components/Layout.jsx` | Skip link, sidebar desktop, mobile topbar & bottom navigation, dan `<Outlet />` |
-| Halaman Dashboard | `src/pages/DashboardPage.jsx` | Ringkasan katalog dan daftar ringkas produk |
-| Halaman Produk | `src/pages/ProductsPage.jsx` | Toolbar produk, grid/list katalog, empty state, dan footer jumlah item |
-| Halaman Detail | `src/pages/ProductDetailPage.jsx` | Pembacaan `useParams()`, tampilan detail per ID, dan fallback jika ID tidak ada |
-| Halaman Settings | `src/pages/SettingsPage.jsx` | Pilihan mode tampilan `Grid` / `List` dengan `aria-pressed` |
-| Halaman 404 | `src/pages/NotFoundPage.jsx` | Penanganan rute tidak dikenal dengan `useLocation()` |
-| Komponen Produk & Modal | `src/Navbar.jsx`, `src/ProductCard.jsx`, `src/ProductModal.jsx`, `src/DeleteModal.jsx` | Toolbar produk, kartu grid/list, modal tambah/edit, dan modal konfirmasi hapus |
-| Utilitas Murni | `src/utils/formatPrice.js`, `src/utils/productUtils.js` | Pemformat harga rupiah, filter, validasi input, pencarian ID, ringkasan, dan normalisasi `viewMode` |
+| Halaman | `src/pages/DashboardPage.jsx`, `src/pages/ProductsPage.jsx`, `src/pages/ProductDetailPage.jsx`, `src/pages/SettingsPage.jsx`, `src/pages/NotFoundPage.jsx` | Implementasi masing-masing rute dan penanganan status loading/error/kosong |
+| Komponen & Utilitas | `src/Navbar.jsx`, `src/ProductCard.jsx`, `src/ProductModal.jsx`, `src/DeleteModal.jsx`, `src/utils/formatPrice.js`, `src/utils/productUtils.js` | Toolbar produk, kartu grid/list, modal dengan state submit async, formatter, dan helper murni |
 
-## Cara Menjalankan dan Pengujian Lokal
+## Cara Menjalankan Backend, Frontend, dan Pengujian Lokal
+
+1. Jalankan backend ExpressJS + PostgreSQL (dari proyek Tugas 2):
 
 ```bash
-git clone https://github.com/Afahmisan/Tugas4-Minggu12-Penweb.git
-cd Tugas4-Minggu12-Penweb
+cd ../../tugas2/tugass2
+node server.js
+```
+
+2. Pada terminal terpisah, jalankan frontend React + Vite:
+
+```bash
 npm install
 npm run dev
 ```
@@ -59,34 +74,33 @@ npm run dev
 Perintah verifikasi lokal (pada PowerShell Windows yang memblokir `npm.ps1`, gunakan `npm.cmd`):
 
 ```bash
-npm test      # Menjalankan 6 unit test di tests/productUtils.test.js
-npm run lint  # Menjalankan oxlint pada berkas sumber
+npm test      # Menjalankan 11 unit test di tests/productUtils.test.js dan tests/productApi.test.js
+npm run lint  # Menjalankan oxlint pada seluruh berkas sumber
 npm run build # Membangun bundle produksi Vite ke folder dist/
 ```
 
-## Pengujian dan Bukti Tampilan
+## Pengujian E2E dan Bukti Tampilan
 
-Pengecekan otomatis mencatat 6 dari 6 unit test di `tests/productUtils.test.js` lulus, `oxlint` bersih dengan 0 warning dan 0 error, serta `vite build` berhasil. Pengujian interaktif pada Chrome untuk viewport desktop (`1280x800`), tablet (`768x1024`), dan mobile (`375x812`) berjalan dengan 0 console error aplikasi dan 0 horizontal overflow (`scrollWidth <= innerWidth`).
+Pengecekan otomatis mencatat 11 dari 11 unit test lulus, `oxlint` bersih dengan 0 warning dan 0 error, serta `vite build` selesai tanpa error. Pengujian E2E langsung pada Chrome terhadap backend ExpressJS + PostgreSQL untuk viewport desktop (`1280x800`), tablet (`768x1024`), dan mobile (`375x812`) berjalan dengan 0 error runtime aplikasi dan 0 horizontal overflow (`scrollWidth <= innerWidth`), termasuk pengujian full page reload untuk membuktikan persistensi database.
 
 | Skenario | Hasil yang Diharapkan | Hasil Aktual |
 |---|---|---|
-| Akses `/` menuju `/dashboard` dan uji `Tab` | Redirect ke `/dashboard`, ringkasan faktual tampil (`5` produk, `Rp34.000`, `Grid`), skip link muncul saat `Tab` | Sesuai |
-| Halaman `/products` mode Grid dan pencarian | 5 produk tampil dalam grid 3 kolom; pencarian `"Buku"` menyaring ke `Buku Tulis`; tombol hapus pencarian mengembalikan daftar | Sesuai |
-| Tambah, edit, hapus produk dan validasi modal | Validasi menolak input kosong; `Map` (`Rp4.500`) bertambah ke `ID: 6`; `ID: 2` berubah ke `Buku Tulis Campus` (`Rp15.000`); `Escape` menutup modal tanpa menghapus; konfirmasi menghapus `Spidol` | Sesuai |
-| Halaman detail `/products/:id` dan ID tidak ada | `/products/2` menampilkan data sesuai ID 2 dan link kembali; `/products/999` menampilkan pesan tidak ditemukan + link kembali | Sesuai |
-| Pengaturan Grid/List dari `/settings` | Memilih `Tampilan List` mengubah status menjadi `Aktif` dan mengubah tata letak `/products` menjadi list horizontal | Sesuai |
-| Halaman 404 (`/*`) | URL tidak dikenal (`/halaman-tidak-ada`) menampilkan kode `404`, pesan jelas, path, dan tautan kembali | Sesuai |
-| Responsif Tablet (`768x1024`) dan Mobile (`375x812`) | Seluruh rute bebas horizontal overflow (`scrollWidth <= innerWidth`) dan konten bawah tidak tertutup bottom navigation | Sesuai |
+| Akses `/` menuju `/dashboard` dan `GET /api/products` | Redirect ke `/dashboard`, `GET /api/products` (`200 OK`) memuat data PostgreSQL (`ID: 1 Buku Tulis Campus Rp18.000`) | Sesuai |
+| Tambah produk ke PostgreSQL dan reload halaman | `POST /api/products` (`201 Created`) untuk `Pulpen Gel` dan `Penggaris`; data tetap ada setelah full page reload | Sesuai |
+| Pencarian, edit, dan hapus ke PostgreSQL | Filter `"Pulpen"` bekerja; `PUT /api/products/3` (`200 OK`) mengubah ke `Pulpen Biru`; `Escape` membatalkan hapus; `DELETE /api/products/4` (`200 OK`) menghapus `Penggaris` permanen | Sesuai |
+| Halaman detail `/products/:id` setelah reload dan ID `99999` | Full reload `/products/3` memuat `GET /api/products/3` dan tampil sesuai ID; `/products/99999` menerima `404` dan menampilkan pesan tidak ditemukan | Sesuai |
+| Pengaturan Grid/List dari `/settings` | Memilih `Tampilan List` mengubah status menjadi `Aktif` dan mengubah daftar `/products` menjadi list horizontal | Sesuai |
+| Halaman 404 (`/*`) dan uji responsif Tablet/Mobile | URL `/halaman-tidak-ada` menampilkan halaman `404`; `scrollWidth <= innerWidth` pada `768x1024` dan `375x812`, footer berjarak 52px di atas bottom nav | Sesuai |
 
 ### Galeri Bukti Screenshot
 
 | Halaman | Tampilan |
 |---|---|
-| Dashboard (`1280x800`) | ![Dashboard](evidence/01_dashboard.png) |
-| Produk Mode Grid (`1280x800`) | ![Produk Grid](evidence/02_products_grid.png) |
-| Setelah Tambah Produk (`Map`, `Rp4.500`) | ![After Tambah](evidence/03_crud_after_add.png) |
-| Setelah Edit `ID: 2` dan Hapus `ID: 3` | ![After Edit dan Hapus](evidence/04_crud_after_edit_delete.png) |
-| Detail Produk (`/products/2`) | ![Detail Produk](evidence/05_product_detail.png) |
+| Dashboard dari PostgreSQL (`1280x800`) | ![Dashboard](evidence/01_dashboard.png) |
+| Produk Mode Grid dari PostgreSQL (`1280x800`) | ![Produk Grid](evidence/02_products_grid.png) |
+| Setelah Tambah & Full Reload (`3 produk`) | ![After Tambah](evidence/03_crud_after_add.png) |
+| Setelah Edit & Hapus Permanen (`2 produk`) | ![After Edit dan Hapus](evidence/04_crud_after_edit_delete.png) |
+| Detail Produk `/products/3` Setelah Reload | ![Detail Produk](evidence/05_product_detail.png) |
 | Halaman Settings (`Tampilan List`) | ![Settings List](evidence/06_settings_list.png) |
 | Produk Mode List (`1280x800`) | ![Produk List](evidence/07_products_list.png) |
 | Halaman 404 (`/halaman-tidak-ada`) | ![Halaman 404](evidence/08_not_found_404.png) |
