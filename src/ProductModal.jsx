@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { validateProductInput } from './utils/productUtils';
 
-function ProductModal({ product, onClose, onSave }) {
+function ProductModal({
+    product,
+    isSubmitting = false,
+    submitError = '',
+    onClose,
+    onSave,
+}) {
     const isEdit = Boolean(product);
     const [name, setName] = useState(product ? product.name : '');
     const [price, setPrice] = useState(product ? String(product.price) : '');
@@ -12,17 +18,18 @@ function ProductModal({ product, onClose, onSave }) {
         nameInputRef.current?.focus();
 
         function handleKeyDown(e) {
-            if (e.key === 'Escape') {
+            if (e.key === 'Escape' && !isSubmitting) {
                 onClose();
             }
         }
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [onClose]);
+    }, [isSubmitting, onClose]);
 
     function handleSubmit(e) {
         e.preventDefault();
+        if (isSubmitting) return;
 
         const result = validateProductInput(name, price);
         if (result.error) {
@@ -33,11 +40,18 @@ function ProductModal({ product, onClose, onSave }) {
         onSave(result.data);
     }
 
+    const displayError = error || submitError;
+    const submitLabel = isSubmitting
+        ? 'Menyimpan...'
+        : isEdit
+          ? 'Simpan Perubahan'
+          : 'Simpan Produk';
+
     return (
         <div
             className="modal-overlay"
             onClick={(e) => {
-                if (e.target === e.currentTarget) {
+                if (e.target === e.currentTarget && !isSubmitting) {
                     onClose();
                 }
             }}
@@ -63,6 +77,7 @@ function ProductModal({ product, onClose, onSave }) {
                     <button
                         type="button"
                         onClick={onClose}
+                        disabled={isSubmitting}
                         aria-label="Tutup modal"
                         className="btn-icon-close"
                     >
@@ -86,9 +101,9 @@ function ProductModal({ product, onClose, onSave }) {
                 {isEdit && <span className="modal-edit-badge">ID: {product.id}</span>}
 
                 <form onSubmit={handleSubmit} noValidate className="modal-form">
-                    {error && (
+                    {displayError && (
                         <p role="alert" className="alert-error">
-                            {error}
+                            {displayError}
                         </p>
                     )}
 
@@ -101,6 +116,7 @@ function ProductModal({ product, onClose, onSave }) {
                             id="product-name"
                             type="text"
                             value={name}
+                            disabled={isSubmitting}
                             onChange={(e) => {
                                 setName(e.target.value);
                                 if (error) setError('');
@@ -120,6 +136,7 @@ function ProductModal({ product, onClose, onSave }) {
                             min="1"
                             step="1"
                             value={price}
+                            disabled={isSubmitting}
                             onChange={(e) => {
                                 setPrice(e.target.value);
                                 if (error) setError('');
@@ -134,12 +151,17 @@ function ProductModal({ product, onClose, onSave }) {
                         <button
                             type="button"
                             onClick={onClose}
+                            disabled={isSubmitting}
                             className="btn btn-neutral"
                         >
                             Batal
                         </button>
-                        <button type="submit" className="btn btn-primary">
-                            {isEdit ? 'Simpan Perubahan' : 'Simpan Produk'}
+                        <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="btn btn-primary"
+                        >
+                            {submitLabel}
                         </button>
                     </div>
                 </form>

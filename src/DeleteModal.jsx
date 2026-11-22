@@ -1,27 +1,33 @@
 import { useEffect, useRef } from 'react';
 import { formatPrice } from './utils/formatPrice';
 
-function DeleteModal({ product, onClose, onConfirm }) {
+function DeleteModal({
+    product,
+    isSubmitting = false,
+    submitError = '',
+    onClose,
+    onConfirm,
+}) {
     const cancelButtonRef = useRef(null);
 
     useEffect(() => {
         cancelButtonRef.current?.focus();
 
         function handleKeyDown(e) {
-            if (e.key === 'Escape') {
+            if (e.key === 'Escape' && !isSubmitting) {
                 onClose();
             }
         }
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [onClose]);
+    }, [isSubmitting, onClose]);
 
     return (
         <div
             className="modal-overlay"
             onClick={(e) => {
-                if (e.target === e.currentTarget) {
+                if (e.target === e.currentTarget && !isSubmitting) {
                     onClose();
                 }
             }}
@@ -35,6 +41,7 @@ function DeleteModal({ product, onClose, onConfirm }) {
                 <button
                     type="button"
                     onClick={onClose}
+                    disabled={isSubmitting}
                     aria-label="Tutup modal"
                     className="delete-close-btn"
                 >
@@ -78,6 +85,14 @@ function DeleteModal({ product, onClose, onConfirm }) {
                     Produk yang dihapus tidak dapat dikembalikan.
                 </p>
 
+                {submitError && (
+                    <div className="modal-form">
+                        <p role="alert" className="alert-error">
+                            {submitError}
+                        </p>
+                    </div>
+                )}
+
                 <div className="delete-preview">
                     <span className="product-id-badge">ID: {product.id}</span>
                     <p className="delete-preview-name">{product.name}</p>
@@ -91,6 +106,7 @@ function DeleteModal({ product, onClose, onConfirm }) {
                         ref={cancelButtonRef}
                         type="button"
                         onClick={onClose}
+                        disabled={isSubmitting}
                         className="btn btn-neutral"
                     >
                         Batal
@@ -98,9 +114,10 @@ function DeleteModal({ product, onClose, onConfirm }) {
                     <button
                         type="button"
                         onClick={() => onConfirm(product.id)}
+                        disabled={isSubmitting}
                         className="btn btn-danger-solid"
                     >
-                        Hapus Produk
+                        {isSubmitting ? 'Menghapus...' : 'Hapus Produk'}
                     </button>
                 </div>
             </div>

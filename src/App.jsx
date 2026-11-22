@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
     Navigate,
     Route,
@@ -14,15 +14,13 @@ import SettingsPage from './pages/SettingsPage';
 import NotFoundPage from './pages/NotFoundPage';
 import ProductModal from './ProductModal';
 import DeleteModal from './DeleteModal';
+import {
+    createProduct,
+    deleteProduct,
+    fetchProducts,
+    updateProduct,
+} from './utils/productApi';
 import { normalizeViewMode } from './utils/productUtils';
-
-const INITIAL_PRODUCTS = [
-    { id: 1, name: 'Pulpen', price: 5000 },
-    { id: 2, name: 'Buku Tulis', price: 12000 },
-    { id: 3, name: 'Spidol', price: 8000 },
-    { id: 4, name: 'Penggaris', price: 6000 },
-    { id: 5, name: 'Penghapus', price: 3000 },
-];
 
 const VIEW_MODE_STORAGE_KEY = 'productViewMode';
 
@@ -35,8 +33,11 @@ function loadInitialViewMode() {
 }
 
 function App() {
-    const [products, setProducts] = useState(INITIAL_PRODUCTS);
-    const [nextId, setNextId] = useState(INITIAL_PRODUCTS.length + 1);
+    const [products, setProducts] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [loadError, setLoadError] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [modalError, setModalError] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
     const [viewMode, setViewMode] = useState(loadInitialViewMode);
     const [isFormOpen, setIsFormOpen] = useState(false);
@@ -45,6 +46,33 @@ function App() {
 
     const navigate = useNavigate();
     const location = useLocation();
+
+    const loadProducts = useCallback(async (isCancelled = () => false) => {
+        setIsLoading(true);
+        setLoadError('');
+        try {
+            const data = await fetchProducts();
+            if (!isCancelled()) {
+                setProducts(Array.isArray(data) ? data : []);
+            }
+        } catch (err) {
+            if (!isCancelled()) {
+                setLoadError(err.message || 'Gagal memuat daftar produk.');
+            }
+        } finally {
+            if (!isCancelled()) {
+                setIsLoading(false);
+            }
+        }
+    }, []);
+
+    useEffect(() => {
+        let cancelled = false;
+        loadProducts(() => cancelled);
+        return () => {
+            cancelled = true;
+        };
+    }, [loadProducts]);
 
     function handleViewModeChange(nextMode) {
         const normalized = normalizeViewMode(nextMode);
@@ -58,39 +86,76 @@ function App() {
 
     function openAddModal() {
         setEditingProduct(null);
+        setModalError('');
         setIsFormOpen(true);
     }
 
     function openEditModal(product) {
         setEditingProduct(product);
+        setModalError('');
         setIsFormOpen(true);
     }
 
+    function openDeleteModal(product) {
+        setModalError('');
+        setDeletingProduct(product);
+    }
+
     function closeFormModal() {
+        if (isSubmitting) return;
         setIsFormOpen(false);
         setEditingProduct(null);
+        setModalError('');
     }
 
-    function handleSaveProduct({ name, price }) {
-        if (editingProduct) {
-            setProducts((prev) =>
-                prev.map((item) =>
-                    item.id === editingProduct.id ? { ...item, name, price } : item
-                )
-            );
-        } else {
-            setProducts((prev) => [...prev, { id: nextId, name, price }]);
-            setNextId((prev) => prev + 1);
-        }
-        closeFormModal();
-    }
-
-    function handleDeleteProduct(productId) {
-        setProducts((prev) => prev.filter((item) => item.id !== productId));
+    function closeDeleteModal() {
+        if (isSubmitting) return;
         setDeletingProduct(null);
+        setModalError('');
+    }
 
-        if (location.pathname === `/products/${productId}`) {
-            navigate('/products', { replace: true });
+    async function handleSaveProduct({ name, price }) {
+        setIsSubmitting(true);
+        setModalError('');
+        try {
+            if (editingProduct) {
+                const updated = await updateProduct(editingProduct.id, {
+                    name,
+                    price,
+                });
+                setProducts((prev) =>
+                    prev.map((item) =>
+                        item.id === editingProduct.id ? updated : item
+                    )
+                );
+            } else {
+                const created = await createProduct({ name, price });
+                setProducts((prev) => [...prev, created]);
+            }
+            setIsFormOpen(false);
+            setEditingProduct(null);
+        } catch (err) {
+            setModalError(err.message || 'Gagal menyimpan produk.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    }
+
+    async function handleDeleteProduct(productId) {
+        setIsSubmitting(true);
+        setModalError('');
+        try {
+            await deleteProduct(productId);
+            setProducts((prev) => prev.filter((item) => item.id !== productId));
+            setDeletingProduct(null);
+
+            if (location.pathname === `/products/${productId}`) {
+                navigate('/products', { replace: true });
+            }
+        } catch (err) {
+            setModalError(err.message || 'Gagal menghapus produk.');
+        } finally {
+            setIsSubmitting(false);
         }
     }
 
@@ -113,6 +178,9 @@ function App() {
                             <DashboardPage
                                 products={products}
                                 viewMode={viewMode}
+                                isLoading={isLoading}
+                                loadError={loadError}
+                                onRetry={() => loadProducts()}
                                 onAddClick={openAddModal}
                             />
                         }
@@ -125,9 +193,12 @@ function App() {
                                 searchQuery={searchQuery}
                                 onSearchChange={setSearchQuery}
                                 viewMode={viewMode}
+                                isLoading={isLoading}
+                                loadError={loadError}
+                                onRetry={() => loadProducts()}
                                 onAddClick={openAddModal}
                                 onEdit={openEditModal}
-                                onDelete={setDeletingProduct}
+                                onDelete={openDeleteModal}
                             />
                         }
                     />
@@ -137,7 +208,7 @@ function App() {
                             <ProductDetailPage
                                 products={products}
                                 onEdit={openEditModal}
-                                onDelete={setDeletingProduct}
+                                onDelete={openDeleteModal}
                             />
                         }
                     />
@@ -158,6 +229,8 @@ function App() {
                 <ProductModal
                     key={editingProduct ? editingProduct.id : 'new'}
                     product={editingProduct}
+                    isSubmitting={isSubmitting}
+                    submitError={modalError}
                     onClose={closeFormModal}
                     onSave={handleSaveProduct}
                 />
@@ -166,7 +239,9 @@ function App() {
             {deletingProduct && (
                 <DeleteModal
                     product={deletingProduct}
-                    onClose={() => setDeletingProduct(null)}
+                    isSubmitting={isSubmitting}
+                    submitError={modalError}
+                    onClose={closeDeleteModal}
                     onConfirm={handleDeleteProduct}
                 />
             )}
