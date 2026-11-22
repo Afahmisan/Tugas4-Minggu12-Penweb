@@ -1,12 +1,52 @@
+import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { formatPrice } from '../utils/formatPrice';
-import { findProductById } from '../utils/productUtils';
+import { fetchProductById } from '../utils/productApi';
 
 function ProductDetailPage({ products, onEdit, onDelete }) {
     const { id } = useParams();
-    const product = findProductById(products, id);
+    const [fetchedProduct, setFetchedProduct] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [errorInfo, setErrorInfo] = useState(null);
 
-    if (!product) {
+    const loadDetail = useCallback(async (productId, isCancelled = () => false) => {
+        setIsLoading(true);
+        setErrorInfo(null);
+        try {
+            const data = await fetchProductById(productId);
+            if (!isCancelled()) {
+                setFetchedProduct(data);
+            }
+        } catch (err) {
+            if (!isCancelled()) {
+                setFetchedProduct(null);
+                setErrorInfo({
+                    status: err.status ?? 0,
+                    message: err.message || 'Gagal memuat detail produk.',
+                });
+            }
+        } finally {
+            if (!isCancelled()) {
+                setIsLoading(false);
+            }
+        }
+    }, []);
+
+    useEffect(() => {
+        let cancelled = false;
+        loadDetail(id, () => cancelled);
+        return () => {
+            cancelled = true;
+        };
+    }, [id, loadDetail]);
+
+    // Keep detail view synced after inline edits without an extra round-trip.
+    const syncedProduct =
+        fetchedProduct &&
+        products.find((item) => item.id === fetchedProduct.id);
+    const product = syncedProduct || fetchedProduct;
+
+    if (isLoading) {
         return (
             <div>
                 <div className="breadcrumb-row">
@@ -15,12 +55,38 @@ function ProductDetailPage({ products, onEdit, onDelete }) {
                     </Link>
                 </div>
 
-                <section className="empty-panel" aria-labelledby="missing-product-title">
+                <section
+                    className="status-panel"
+                    role="status"
+                    aria-live="polite"
+                >
+                    <p className="status-title">Memuat detail produk...</p>
+                    <p className="status-desc">
+                        Mengambil data produk ID {id} dari server backend ExpressJS.
+                    </p>
+                </section>
+            </div>
+        );
+    }
+
+    if (errorInfo && (errorInfo.status === 404 || errorInfo.status === 400)) {
+        return (
+            <div>
+                <div className="breadcrumb-row">
+                    <Link to="/products" className="inline-link">
+                        Kembali ke Daftar Produk
+                    </Link>
+                </div>
+
+                <section
+                    className="empty-panel"
+                    aria-labelledby="missing-product-title"
+                >
                     <h1 id="missing-product-title" className="empty-title">
                         Produk Tidak Ditemukan
                     </h1>
                     <p className="empty-desc">
-                        Produk dengan ID &quot;{id}&quot; tidak tersedia dalam daftar saat ini.
+                        Produk dengan ID &quot;{id}&quot; tidak tersedia dalam database.
                     </p>
                     <div className="empty-actions">
                         <Link to="/products" className="btn btn-primary">
@@ -35,7 +101,42 @@ function ProductDetailPage({ products, onEdit, onDelete }) {
         );
     }
 
+    if (errorInfo || !product) {
+        return (
+            <div>
+                <div className="breadcrumb-row">
+                    <Link to="/products" className="inline-link">
+                        Kembali ke Daftar Produk
+                    </Link>
+                </div>
+
+                <section className="error-panel" role="alert">
+                    <h1 className="error-title">Gagal Memuat Detail Produk</h1>
+                    <p className="error-desc">
+                        {errorInfo?.message || 'Data produk tidak dapat dimuat.'}
+                    </p>
+                    <div className="empty-actions">
+                        <button
+                            type="button"
+                            onClick={() => loadDetail(id)}
+                            className="btn btn-primary"
+                        >
+                            Coba Lagi
+                        </button>
+                        <Link to="/products" className="btn btn-neutral">
+                            Kembali ke Daftar Produk
+                        </Link>
+                    </div>
+                </section>
+            </div>
+        );
+    }
+
     const productIndex = products.findIndex((item) => item.id === product.id);
+    const catalogPosition =
+        productIndex >= 0
+            ? `Produk ke-${productIndex + 1} dari ${products.length}`
+            : 'Tersimpan di PostgreSQL via ExpressJS';
 
     return (
         <div>
@@ -65,13 +166,13 @@ function ProductDetailPage({ products, onEdit, onDelete }) {
                     </div>
                     <div className="detail-meta-item">
                         <dt className="detail-meta-label">Harga Satuan</dt>
-                        <dd className="detail-meta-value">{formatPrice(product.price)}</dd>
+                        <dd className="detail-meta-value">
+                            {formatPrice(product.price)}
+                        </dd>
                     </div>
                     <div className="detail-meta-item">
                         <dt className="detail-meta-label">Posisi di Katalog</dt>
-                        <dd className="detail-meta-value">
-                            Produk ke-{productIndex + 1} dari {products.length}
-                        </dd>
+                        <dd className="detail-meta-value">{catalogPosition}</dd>
                     </div>
                 </dl>
 
