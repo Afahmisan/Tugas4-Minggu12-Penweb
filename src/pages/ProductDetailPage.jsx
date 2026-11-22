@@ -1,44 +1,52 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { formatPrice } from '../utils/formatPrice';
 import { fetchProductById } from '../utils/productApi';
 
 function ProductDetailPage({ products, onEdit, onDelete }) {
     const { id } = useParams();
-    const [fetchedProduct, setFetchedProduct] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [errorInfo, setErrorInfo] = useState(null);
-
-    const loadDetail = useCallback(async (productId, isCancelled = () => false) => {
-        setIsLoading(true);
-        setErrorInfo(null);
-        try {
-            const data = await fetchProductById(productId);
-            if (!isCancelled()) {
-                setFetchedProduct(data);
-            }
-        } catch (err) {
-            if (!isCancelled()) {
-                setFetchedProduct(null);
-                setErrorInfo({
-                    status: err.status ?? 0,
-                    message: err.message || 'Gagal memuat detail produk.',
-                });
-            }
-        } finally {
-            if (!isCancelled()) {
-                setIsLoading(false);
-            }
-        }
-    }, []);
+    const [retryTick, setRetryTick] = useState(0);
+    const [detailState, setDetailState] = useState({
+        id: null,
+        product: null,
+        errorInfo: null,
+    });
 
     useEffect(() => {
         let cancelled = false;
-        loadDetail(id, () => cancelled);
+
+        fetchProductById(id)
+            .then((data) => {
+                if (!cancelled) {
+                    setDetailState({ id, product: data, errorInfo: null });
+                }
+            })
+            .catch((err) => {
+                if (!cancelled) {
+                    setDetailState({
+                        id,
+                        product: null,
+                        errorInfo: {
+                            status: err.status ?? 0,
+                            message: err.message || 'Gagal memuat detail produk.',
+                        },
+                    });
+                }
+            });
+
         return () => {
             cancelled = true;
         };
-    }, [id, loadDetail]);
+    }, [id, retryTick]);
+
+    function retryLoadDetail() {
+        setDetailState({ id: null, product: null, errorInfo: null });
+        setRetryTick((prev) => prev + 1);
+    }
+
+    const isLoading = detailState.id !== id;
+    const errorInfo = isLoading ? null : detailState.errorInfo;
+    const fetchedProduct = isLoading ? null : detailState.product;
 
     // Keep detail view synced after inline edits without an extra round-trip.
     const syncedProduct =
@@ -118,7 +126,7 @@ function ProductDetailPage({ products, onEdit, onDelete }) {
                     <div className="empty-actions">
                         <button
                             type="button"
-                            onClick={() => loadDetail(id)}
+                            onClick={retryLoadDetail}
                             className="btn btn-primary"
                         >
                             Coba Lagi

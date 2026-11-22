@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     Navigate,
     Route,
@@ -36,6 +36,7 @@ function App() {
     const [products, setProducts] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [loadError, setLoadError] = useState('');
+    const [reloadTick, setReloadTick] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [modalError, setModalError] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
@@ -47,32 +48,34 @@ function App() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const loadProducts = useCallback(async (isCancelled = () => false) => {
-        setIsLoading(true);
-        setLoadError('');
-        try {
-            const data = await fetchProducts();
-            if (!isCancelled()) {
-                setProducts(Array.isArray(data) ? data : []);
-            }
-        } catch (err) {
-            if (!isCancelled()) {
-                setLoadError(err.message || 'Gagal memuat daftar produk.');
-            }
-        } finally {
-            if (!isCancelled()) {
-                setIsLoading(false);
-            }
-        }
-    }, []);
-
     useEffect(() => {
         let cancelled = false;
-        loadProducts(() => cancelled);
+
+        fetchProducts()
+            .then((data) => {
+                if (!cancelled) {
+                    setProducts(Array.isArray(data) ? data : []);
+                    setLoadError('');
+                    setIsLoading(false);
+                }
+            })
+            .catch((err) => {
+                if (!cancelled) {
+                    setLoadError(err.message || 'Gagal memuat daftar produk.');
+                    setIsLoading(false);
+                }
+            });
+
         return () => {
             cancelled = true;
         };
-    }, [loadProducts]);
+    }, [reloadTick]);
+
+    function retryLoadProducts() {
+        setIsLoading(true);
+        setLoadError('');
+        setReloadTick((prev) => prev + 1);
+    }
 
     function handleViewModeChange(nextMode) {
         const normalized = normalizeViewMode(nextMode);
@@ -180,7 +183,7 @@ function App() {
                                 viewMode={viewMode}
                                 isLoading={isLoading}
                                 loadError={loadError}
-                                onRetry={() => loadProducts()}
+                                onRetry={retryLoadProducts}
                                 onAddClick={openAddModal}
                             />
                         }
@@ -195,7 +198,7 @@ function App() {
                                 viewMode={viewMode}
                                 isLoading={isLoading}
                                 loadError={loadError}
-                                onRetry={() => loadProducts()}
+                                onRetry={retryLoadProducts}
                                 onAddClick={openAddModal}
                                 onEdit={openEditModal}
                                 onDelete={openDeleteModal}
