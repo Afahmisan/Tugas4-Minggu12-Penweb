@@ -1,9 +1,20 @@
 import { useState } from 'react';
-import Navbar from './Navbar';
-import ProductCard from './ProductCard';
+import {
+    Navigate,
+    Route,
+    Routes,
+    useLocation,
+    useNavigate,
+} from 'react-router-dom';
+import Layout from './components/Layout';
+import DashboardPage from './pages/DashboardPage';
+import ProductsPage from './pages/ProductsPage';
+import ProductDetailPage from './pages/ProductDetailPage';
+import SettingsPage from './pages/SettingsPage';
+import NotFoundPage from './pages/NotFoundPage';
 import ProductModal from './ProductModal';
 import DeleteModal from './DeleteModal';
-import { filterProducts } from './utils/productUtils';
+import { normalizeViewMode } from './utils/productUtils';
 
 const INITIAL_PRODUCTS = [
     { id: 1, name: 'Pulpen', price: 5000 },
@@ -13,15 +24,37 @@ const INITIAL_PRODUCTS = [
     { id: 5, name: 'Penghapus', price: 3000 },
 ];
 
+const VIEW_MODE_STORAGE_KEY = 'productViewMode';
+
+function loadInitialViewMode() {
+    try {
+        return normalizeViewMode(window.localStorage.getItem(VIEW_MODE_STORAGE_KEY));
+    } catch {
+        return 'grid';
+    }
+}
+
 function App() {
     const [products, setProducts] = useState(INITIAL_PRODUCTS);
     const [nextId, setNextId] = useState(INITIAL_PRODUCTS.length + 1);
     const [searchQuery, setSearchQuery] = useState('');
+    const [viewMode, setViewMode] = useState(loadInitialViewMode);
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
     const [deletingProduct, setDeletingProduct] = useState(null);
 
-    const filteredProducts = filterProducts(products, searchQuery);
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    function handleViewModeChange(nextMode) {
+        const normalized = normalizeViewMode(nextMode);
+        setViewMode(normalized);
+        try {
+            window.localStorage.setItem(VIEW_MODE_STORAGE_KEY, normalized);
+        } catch {
+            // Abaikan jika localStorage tidak tersedia.
+        }
+    }
 
     function openAddModal() {
         setEditingProduct(null);
@@ -55,69 +88,71 @@ function App() {
     function handleDeleteProduct(productId) {
         setProducts((prev) => prev.filter((item) => item.id !== productId));
         setDeletingProduct(null);
+
+        if (location.pathname === `/products/${productId}`) {
+            navigate('/products', { replace: true });
+        }
     }
 
     return (
-        <div className="page-shell">
-            <main className="page-container">
-                <Navbar
-                    searchQuery={searchQuery}
-                    onSearchChange={setSearchQuery}
-                    onAddClick={openAddModal}
-                    totalProducts={products.length}
-                />
-
-                {filteredProducts.length > 0 ? (
-                    <section aria-label="Daftar produk" className="products-grid">
-                        {filteredProducts.map((product) => (
-                            <ProductCard
-                                key={product.id}
-                                product={product}
+        <>
+            <Routes>
+                <Route
+                    path="/"
+                    element={
+                        <Layout
+                            totalProducts={products.length}
+                            viewMode={viewMode}
+                        />
+                    }
+                >
+                    <Route index element={<Navigate to="/dashboard" replace />} />
+                    <Route
+                        path="dashboard"
+                        element={
+                            <DashboardPage
+                                products={products}
+                                viewMode={viewMode}
+                                onAddClick={openAddModal}
+                            />
+                        }
+                    />
+                    <Route
+                        path="products"
+                        element={
+                            <ProductsPage
+                                products={products}
+                                searchQuery={searchQuery}
+                                onSearchChange={setSearchQuery}
+                                viewMode={viewMode}
+                                onAddClick={openAddModal}
                                 onEdit={openEditModal}
                                 onDelete={setDeletingProduct}
                             />
-                        ))}
-                    </section>
-                ) : (
-                    <div className="empty-panel">
-                        <p className="empty-title">
-                            {products.length === 0
-                                ? 'Belum ada produk yang tersimpan.'
-                                : `Tidak ada produk dengan kata kunci "${searchQuery.trim()}".`}
-                        </p>
-                        <p className="empty-desc">
-                            {products.length === 0
-                                ? 'Tambahkan produk pertama Anda menggunakan tombol di bawah ini.'
-                                : 'Coba gunakan kata kunci lain atau tampilkan semua produk.'}
-                        </p>
-                        <div className="empty-actions">
-                            {products.length === 0 ? (
-                                <button
-                                    type="button"
-                                    onClick={openAddModal}
-                                    className="btn btn-primary"
-                                >
-                                    + Tambah Produk
-                                </button>
-                            ) : (
-                                <button
-                                    type="button"
-                                    onClick={() => setSearchQuery('')}
-                                    className="btn btn-secondary"
-                                >
-                                    Reset Pencarian
-                                </button>
-                            )}
-                        </div>
-                    </div>
-                )}
-
-                <footer className="list-footer">
-                    <p className="list-footer-text">
-                        Menampilkan {filteredProducts.length} dari {products.length} produk
-                    </p>
-                </footer>
-            </main>
+                        }
+                    />
+                    <Route
+                        path="products/:id"
+                        element={
+                            <ProductDetailPage
+                                products={products}
+                                onEdit={openEditModal}
+                                onDelete={setDeletingProduct}
+                            />
+                        }
+                    />
+                    <Route
+                        path="settings"
+                        element={
+                            <SettingsPage
+                                viewMode={viewMode}
+                                onViewModeChange={handleViewModeChange}
+                            />
+                        }
+                    />
+                    <Route path="*" element={<NotFoundPage />} />
+                </Route>
+            </Routes>
 
             {isFormOpen && (
                 <ProductModal
@@ -135,7 +170,7 @@ function App() {
                     onConfirm={handleDeleteProduct}
                 />
             )}
-        </div>
+        </>
     );
 }
 

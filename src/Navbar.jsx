@@ -1,4 +1,12 @@
-function Navbar({ searchQuery, onSearchChange, onAddClick, totalProducts }) {
+import { Link } from 'react-router-dom';
+
+function Navbar({
+    searchQuery,
+    onSearchChange,
+    onAddClick,
+    totalProducts,
+    viewMode = 'grid',
+}) {
     return (
         <header className="products-header">
             <div className="products-header-inner">
@@ -28,7 +36,7 @@ function Navbar({ searchQuery, onSearchChange, onAddClick, totalProducts }) {
                     </button>
                 </div>
 
-                {/* Baris 2: Search Bar & Total Produk */}
+                {/* Baris 2: Search Bar, Mode Tampilan & Total Produk */}
                 <div className="products-toolbar">
                     <div className="search-box">
                         <svg
@@ -80,7 +88,12 @@ function Navbar({ searchQuery, onSearchChange, onAddClick, totalProducts }) {
                         )}
                     </div>
 
-                    <span className="count-badge">{totalProducts} produk</span>
+                    <div className="toolbar-meta">
+                        <Link to="/settings" className="mode-link-pill">
+                            Tampilan: {viewMode === 'list' ? 'List' : 'Grid'}
+                        </Link>
+                        <span className="count-badge">{totalProducts} produk</span>
+                    </div>
                 </div>
             </div>
         </header>
