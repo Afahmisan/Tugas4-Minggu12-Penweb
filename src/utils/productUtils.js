@@ -1,4 +1,3 @@
-/** Filter products by case-insensitive substring match against product name. */
 export function filterProducts(products, query) {
     const normalized = query.trim().toLowerCase();
     if (!normalized) return products;
@@ -7,7 +6,7 @@ export function filterProducts(products, query) {
     );
 }
 
-/** Validate and parse product modal input; returns { error } or { data: { name, price } }. */
+// Returns { error } or { data: { name, price } } for positive integer prices.
 export function validateProductInput(name, rawPrice) {
     const trimmedName = name.trim();
     if (!trimmedName) {
@@ -31,7 +30,7 @@ export function validateProductInput(name, rawPrice) {
     return { data: { name: trimmedName, price: parsedPrice } };
 }
 
-/** Find a product matching a positive integer route parameter, or return null. */
+// Require digits-only IDs so params like "1abc" or "1.5" do not match.
 export function findProductById(products, rawId) {
     const text = String(rawId ?? '').trim();
     if (!/^\d+$/.test(text)) return null;
@@ -40,7 +39,6 @@ export function findProductById(products, rawId) {
     return products.find((product) => product.id === numericId) ?? null;
 }
 
-/** Compute factual count, total value, min price, and max price from products. */
 export function summarizeProducts(products) {
     if (products.length === 0) {
         return { count: 0, totalValue: 0, minPrice: 0, maxPrice: 0 };
@@ -59,7 +57,6 @@ export function summarizeProducts(products) {
     return { count: products.length, totalValue, minPrice, maxPrice };
 }
 
-/** Normalize persisted or selected product list view mode to 'grid' or 'list'. */
 export function normalizeViewMode(value) {
     return value === 'list' ? 'list' : 'grid';
 }

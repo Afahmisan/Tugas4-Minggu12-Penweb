@@ -10,7 +10,6 @@ function Navbar({
     return (
         <header className="products-header">
             <div className="products-header-inner">
-                {/* Baris 1: Judul & Tombol Tambah */}
                 <div className="products-header-top">
                     <div className="products-brand">
                         <img
@@ -36,7 +35,6 @@ function Navbar({
                     </button>
                 </div>
 
-                {/* Baris 2: Search Bar, Mode Tampilan & Total Produk */}
                 <div className="products-toolbar">
                     <div className="search-box">
                         <svg
