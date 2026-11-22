@@ -7,7 +7,7 @@
   --color-ink: #212121;
   --color-muted: #5b6270;
   --color-line: #e5e7e9;
-  --color-line-input: #d1d5db;
+  --color-line-input: #767e8c;
   --color-brand: #00aa5b;
   --color-brand-primary: #008040;
   --color-brand-primary-hover: #006b35;
@@ -34,6 +34,10 @@
 }
 
 @layer components {
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:min-h-[44px] focus:px-4 focus:py-2.5 focus:rounded-lg focus:bg-brand-primary focus:text-surface focus:text-sm focus:font-semibold focus:outline-2 focus:outline-offset-2 focus:outline-ink;
+  }
+
   /* Kerangka layout bersama (Sidebar desktop + Topbar & Bottom Nav mobile) */
   .app-shell {
     @apply min-h-screen bg-canvas text-ink md:flex;
@@ -64,11 +68,11 @@
   }
 
   .sidebar-link {
-    @apply min-h-[44px] px-3.5 py-2.5 rounded-lg flex items-center gap-3 text-sm font-medium text-ink border border-transparent hover:bg-surface-subtle transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand;
+    @apply min-h-[44px] px-3.5 py-2.5 rounded-lg flex items-center gap-3 text-sm font-medium text-ink border border-transparent hover:bg-surface-subtle transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary;
   }
 
   .sidebar-link-active {
-    @apply bg-brand-soft text-brand-soft-text border-brand-soft-border font-semibold hover:bg-brand-soft;
+    @apply bg-brand-soft text-brand-soft-text border-brand-primary font-semibold hover:bg-brand-soft;
   }
 
   .nav-icon {
@@ -104,7 +108,7 @@
   }
 
   .mobile-brand-title {
-    @apply text-base font-bold text-ink truncate;
+    @apply text-base font-bold text-ink break-words;
   }
 
   .mobile-bottom-nav {
@@ -112,11 +116,11 @@
   }
 
   .mobile-nav-link {
-    @apply min-h-[44px] px-2 py-1.5 rounded-lg flex flex-col items-center justify-center gap-0.5 text-xs font-medium text-muted border border-transparent transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand;
+    @apply min-h-[44px] px-2 py-1.5 rounded-lg flex flex-col items-center justify-center gap-0.5 text-xs font-medium text-muted border border-transparent transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary;
   }
 
   .mobile-nav-link-active {
-    @apply bg-brand-soft text-brand-soft-text border-brand-soft-border font-semibold;
+    @apply bg-brand-soft text-brand-soft-text border-brand-primary font-semibold;
   }
 
   .mobile-nav-icon {
@@ -128,10 +132,6 @@
   }
 
   /* Kontainer halaman dan header */
-  .page-shell {
-    @apply min-h-screen bg-canvas text-ink;
-  }
-
   .page-container {
     @apply max-w-5xl mx-auto px-4 sm:px-6 py-5 sm:py-8;
   }
@@ -150,7 +150,7 @@
 
   /* Header / Toolbar halaman Produk */
   .products-header {
-    @apply bg-surface border border-line border-t-[3px] border-t-brand rounded-xl mb-6;
+    @apply bg-surface border border-line rounded-xl mb-6;
   }
 
   .products-header-inner {
@@ -190,11 +190,11 @@
   }
 
   .search-input {
-    @apply w-full min-h-[44px] pl-10 pr-11 py-2 bg-surface-subtle border border-line-input rounded-lg text-sm text-ink placeholder-muted focus:bg-surface focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand-primary;
+    @apply w-full min-h-[44px] pl-10 pr-11 py-2 bg-surface-subtle border border-line-input rounded-lg text-sm text-ink placeholder-muted focus:bg-surface focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-brand-primary;
   }
 
   .search-clear-btn {
-    @apply absolute right-0 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-muted hover:text-ink hover:bg-gray-100 cursor-pointer focus-visible:outline-2 focus-visible:outline-brand;
+    @apply absolute right-0 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-muted hover:text-ink hover:bg-gray-100 cursor-pointer focus-visible:outline-2 focus-visible:outline-brand-primary;
   }
 
   .search-clear-icon {
@@ -210,12 +210,12 @@
   }
 
   .mode-link-pill {
-    @apply inline-flex items-center min-h-[44px] px-3.5 py-2 rounded-lg text-xs font-semibold text-ink bg-surface-subtle border border-line-input hover:border-brand transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand;
+    @apply inline-flex items-center min-h-[44px] px-3.5 py-2 rounded-lg text-xs font-semibold text-ink bg-surface-subtle border border-line-input hover:border-brand-primary transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary;
   }
 
   /* Tombol dan tautan */
   .btn {
-    @apply inline-flex items-center justify-center min-h-[44px] px-4 py-2 text-sm font-semibold rounded-lg transition cursor-pointer no-underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand;
+    @apply inline-flex items-center justify-center min-h-[44px] px-4 py-2 text-sm font-semibold rounded-lg transition cursor-pointer no-underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary;
   }
 
   .btn-primary {
@@ -247,11 +247,11 @@
   }
 
   .btn-icon-close {
-    @apply min-w-[44px] min-h-[44px] -mr-2 -mt-2 flex items-center justify-center rounded-lg text-muted hover:text-ink hover:bg-gray-100 transition cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand;
+    @apply min-w-[44px] min-h-[44px] -mr-2 -mt-2 flex items-center justify-center rounded-lg text-muted hover:text-ink hover:bg-gray-100 transition cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary;
   }
 
   .inline-link {
-    @apply inline-flex items-center gap-1.5 min-h-[44px] text-sm font-semibold text-brand-primary hover:text-brand-primary-hover underline underline-offset-4 rounded-md px-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand;
+    @apply inline-flex items-center gap-1.5 min-h-[44px] text-sm font-semibold text-brand-primary hover:text-brand-primary-hover underline underline-offset-4 rounded-md px-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary;
   }
 
   /* Daftar produk (Grid dan List) */
@@ -264,7 +264,7 @@
   }
 
   .product-card {
-    @apply bg-surface border border-line hover:border-brand rounded-xl p-5 shadow-xs transition-colors flex flex-col justify-between;
+    @apply bg-surface border border-line hover:border-brand-primary rounded-xl p-5 transition-colors flex flex-col justify-between;
   }
 
   .product-card-list {
@@ -292,7 +292,7 @@
   }
 
   .product-title-link {
-    @apply text-ink hover:text-brand-primary transition-colors no-underline rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand;
+    @apply text-ink hover:text-brand-primary transition-colors no-underline rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary;
   }
 
   .product-card-price {
@@ -342,15 +342,15 @@
 
   /* Modal tambah/edit dan modal konfirmasi hapus */
   .modal-overlay {
-    @apply fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4;
+    @apply fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/45 p-4;
   }
 
   .modal-dialog {
-    @apply w-full max-w-md bg-surface border border-line rounded-xl shadow-xl p-6;
+    @apply my-auto w-full max-w-md bg-surface border border-line rounded-xl shadow-xl p-6;
   }
 
   .modal-dialog-sm {
-    @apply relative w-full max-w-sm bg-surface border border-line rounded-xl shadow-xl p-6;
+    @apply my-auto relative w-full max-w-sm bg-surface border border-line rounded-xl shadow-xl p-6;
   }
 
   .modal-header {
@@ -386,7 +386,7 @@
   }
 
   .form-input {
-    @apply w-full min-h-[44px] px-3 py-2 bg-surface border border-line-input rounded-lg text-sm text-ink placeholder-muted focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand-primary;
+    @apply w-full min-h-[44px] px-3 py-2 bg-surface border border-line-input rounded-lg text-sm text-ink placeholder-muted focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-brand-primary;
   }
 
   .form-hint {
@@ -398,7 +398,7 @@
   }
 
   .delete-close-btn {
-    @apply absolute right-3 top-3 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-muted hover:text-ink hover:bg-gray-100 transition cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand;
+    @apply absolute right-3 top-3 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-muted hover:text-ink hover:bg-gray-100 transition cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary;
   }
 
   .delete-icon-wrap {
@@ -443,7 +443,7 @@
   }
 
   .summary-label {
-    @apply text-xs font-semibold text-muted uppercase tracking-wide;
+    @apply text-xs font-semibold text-muted;
   }
 
   .summary-value {
@@ -479,7 +479,7 @@
   }
 
   .quick-row-name {
-    @apply text-sm font-semibold text-ink hover:text-brand-primary no-underline truncate rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand;
+    @apply text-sm font-semibold text-ink hover:text-brand-primary no-underline break-words rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary;
   }
 
   .quick-row-meta {
@@ -500,7 +500,7 @@
   }
 
   .detail-card {
-    @apply bg-surface border border-line border-t-[3px] border-t-brand rounded-xl p-6 sm:p-8 shadow-xs;
+    @apply bg-surface border border-line rounded-xl p-6 sm:p-8;
   }
 
   .detail-header {
@@ -557,7 +557,7 @@
   }
 
   .option-card {
-    @apply min-h-[44px] w-full text-left p-5 rounded-xl border border-line-input bg-surface hover:border-brand transition cursor-pointer flex flex-col gap-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand;
+    @apply min-h-[44px] w-full text-left p-5 rounded-xl border border-line-input bg-surface hover:border-brand-primary transition cursor-pointer flex flex-col gap-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary;
   }
 
   .option-card-active {
@@ -594,7 +594,7 @@
 
   /* Halaman 404 */
   .not-found-card {
-    @apply max-w-lg mx-auto mt-6 bg-surface border border-line border-t-[3px] border-t-brand rounded-xl p-6 sm:p-8 text-center;
+    @apply max-w-lg mx-auto mt-6 bg-surface border border-line rounded-xl p-6 sm:p-8 text-center;
   }
 
   .not-found-code {

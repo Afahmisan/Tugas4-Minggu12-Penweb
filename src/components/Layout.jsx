@@ -68,6 +68,9 @@ function Layout({ totalProducts, viewMode }) {
 
     return (
         <div className="app-shell">
+            <a href="#main-content" className="skip-link">
+                Lewati ke konten utama
+            </a>
             <aside className="sidebar" aria-label="Navigasi utama">
                 <div className="sidebar-brand">
                     <img
@@ -125,7 +128,7 @@ function Layout({ totalProducts, viewMode }) {
                     <span className="count-badge">{totalProducts} produk</span>
                 </header>
 
-                <main className="page-container">
+                <main id="main-content" className="page-container">
                     <Outlet />
                 </main>
             </div>
